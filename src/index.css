@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base: #0A0F1C;
+  --color-panel: #151B2C;
+  --color-accent: #38BDF8;
+  --color-muted: #1F2937;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-panel);
+  color: #E5E7EB;
+}
+
+button {
+  cursor: pointer;
+}
+
+@utility btn {
+  @apply bg-panel border border-muted hover:bg-muted text-gray-300 text-xs px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap;
+}
