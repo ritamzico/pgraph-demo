@@ -1,0 +1,4 @@
+github.com/alecthomas/participle/v2 v2.1.4 h1:W/H79S8Sat/krZ3el6sQMvMaahJ+XcM9WSI2naI7w2U=
+github.com/alecthomas/participle/v2 v2.1.4/go.mod h1:8tqVbpTX20Ru4NfYQgZf4mP18eXPTBViyMWiArNEgGI=
+github.com/ritamzico/pgraph v0.0.0-20260314003448-15b7c0e620c4 h1:kkb89Wxt4rQbs+Foy10Ln0uFcpbyhISxF5dh4bo2jfQ=
+github.com/ritamzico/pgraph v0.0.0-20260314003448-15b7c0e620c4/go.mod h1:z9vjb11XZgzUlgPaclA0Hdzal8iQGwRfFI1CBv+584s=
