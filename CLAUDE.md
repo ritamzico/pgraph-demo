@@ -2,20 +2,63 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
+## Repo structure
+
+```
+backend/    Go HTTP server (pgraph inference engine API)
+frontend/   React SPA (graph visualizer)
+.github/workflows/deploy-backend.yml   CD pipeline → GCP Cloud Run
+```
+
+---
+
+## Backend (`backend/`)
+
+### Stack
+
+Go — stdlib `net/http`, no framework. Depends on [`github.com/ritamzico/pgraph`](https://github.com/ritamzico/pgraph) for graph loading, querying, and serialization.
+
+### Commands
 
 ```bash
-bun dev        # start dev server (Vite HMR)
-bun run build  # tsc type-check + Vite production build
-bun run lint   # ESLint over all *.ts / *.tsx files
+go build ./cmd/server   # compile
+go run ./cmd/server     # run on :8080 (pass -port N to override)
+```
+
+### API
+
+`POST /query` — accepts `{ graph: <pgraph JSON>, dsl: string }`.
+
+Two response shapes depending on the DSL statement:
+- **Read query** → `{ kind: "query", ... }` (marshalled by `pgraph.MarshalResultJSON`)
+- **Mutation (CREATE/DELETE)** → `{ kind: "mutation", data: <updated graph JSON> }`
+
+CORS is restricted to `http://localhost:5173` and `https://pgraph.ritamchakraborty.com`.
+
+### Deployment
+
+Dockerized via `backend/Dockerfile`. CI/CD runs on push to `main` when `backend/**` changes — builds and pushes an image to GCP Artifact Registry, then deploys to Cloud Run. See [`.github/workflows/deploy-backend.yml`](.github/workflows/deploy-backend.yml).
+
+---
+
+## Frontend (`frontend/`)
+
+### Commands
+
+```bash
+bun dev         # start dev server (Vite HMR)
+bun run build   # tsc type-check + Vite production build
+bun run lint    # ESLint over all *.ts / *.tsx files
 bun run preview # serve the production build locally
 ```
 
+Set `VITE_API_ENDPOINT` to point at the backend (e.g. `http://localhost:8080` locally, the Cloud Run URL in production).
+
 There are no tests yet. TypeScript strict-mode (`noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax`) acts as a first-pass correctness check; run `bun run build` to surface type errors without producing output.
 
-## Architecture
+### Stack
 
-This is a single-page probabilistic graph visualizer. The stack is React 19 + TypeScript + Tailwind v4 (via `@tailwindcss/vite` — no `tailwind.config.js`, configuration goes in CSS using `@theme`).
+React 19 + TypeScript + Tailwind v4 (via `@tailwindcss/vite` — no `tailwind.config.js`, configuration goes in CSS using `@theme`).
 
 ### Data model (`src/types/graph.ts`)
 
@@ -40,7 +83,7 @@ Cursors are updated by direct DOM mutation (`svgRef.current.style.cursor`) to av
 
 ### Query panel (`src/components/QueryPanel.tsx`)
 
-Maintains its own local history of `QueryHistoryItem[]`. The backend call is stubbed — the full integration point is the `handleSubmit` function; replace the `setTimeout` mock with a real `fetch`, then call `onHighlightPath(data.path.nodeIds, data.path.edgeIds)` when the response includes a path.
+Sends DSL queries to `POST /query` via `src/api.ts`. Maintains its own local history of `QueryHistoryItem[]`. On a mutation response (`kind: "mutation"`), calls `onSetGraph` to update the live graph. On a read response, calls `onHighlightPath` with the returned node/edge IDs.
 
 ### Wiring (`src/App.tsx`)
 
