@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react"
 import { GraphCanvas } from './components/GraphCanvas';
 import { GraphSelector } from './components/GraphSelector';
 import { QueryPanel } from './components/QueryPanel';
